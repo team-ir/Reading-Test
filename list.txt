@@ -1,0 +1,5 @@
+[
+    "Di suatu hutan yang rindang, hidup berbagai binatang buas dan jinak. Ada kelinci, burung, kucing, capung, kupu-kupu dan yang lainnya. Pada suatu hari, hutan dilanda badai yang sangat dahsyat. Angin bertiup sangat kencang, menerpa pohon dan daun-daun. Kraak! terdengar bunyi dahan-dahan berpatahan. Banyak hewan yang tidak dapat menyelamatkan dirinya, kecuali si semut yang berlindung di dalam tanah. Badai baru berhenti ketika pagi menjelang. Matahari kembali bersinar hangatnya.",
+	
+	"Tiba-tiba dari dalam tanah muncul seekor semut. Si semut terlindung dari badai karena ia bisa masuk ke sarangnya di dalam tanah. Ketika sedang berjalan, ia melihat seekor kepompong yang tergeletak di dahan daun yang patah. Si semut bergumam, Hmm, alangkah tidak enaknya menjadi kepompong, terkurung dan tidak bisa kemana-mana. Menjadi kepompong memang memalukan!. Coba lihat aku, bisa pergi ke mana saja ku mau, ejek semut pada kepompong. Semut terus mengulang perkataannya pada setiap hewan yang berhasil ditemuinya."
+]
