@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Web Speech API Demo</title>
+<title>Tes Kemampuan Membaca</title>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -82,14 +82,32 @@
     background-color:transparent;
     padding: 0;
   }
+  .highlight {
+    background: #ddd;
+    color: #000;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+  }
+  .highlight-wrong {
+    color: red;
+  }
+  .correct {
+    color: green;
+  }
+  #text {
+	font-family: Times New Roman,Times,serif;
+    font-size: 1.5em;
+  }
 </style>
-<h1 class="center" id="headline">Web Speech Demonstration</h1>
+<h1 class="center" id="headline">Tes Kemampuan Membaca</h1>
 
 <div style="padding: 10px;">
 	<center><select id="select_text" style="width:50px;margin: 10px;"></select></center>
 	<div id="text"></div>
 </div>
 
+<center>Timer: <span id="Timer">0 Seconds</span></center>
 <div id="info">
   <p id="info_start">Click on the microphone icon and begin speaking.</p>
   <p id="info_speak_now">Speak now.</p>
@@ -141,23 +159,62 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <script>
-	var teks;
-	$(function() {
-		$.getJSON( "list.txt", function( data ) {
-			for (var i = 0; i < data.length; i++) {
-			  select_text.options[i] = new Option(i+1, i);
-			}
-			teks = data;
-			$("#text").text(teks[$("#select_text").val()]);
-		});
-		
-		$("#select_text").change(function(){
-			$("#text").text(teks[$(this).val()]);
-		});
+var teks, tokenizedText, pointer = 0;
+$(function() {
+	$.getJSON( "list.txt", function( data ) {
+		for (var i = 0; i < data.length; i++) {
+		  select_text.options[i] = new Option(i+1, i);
+		}
+		teks = data;
+		$("#text").text(teks[$("#select_text").val()]);
+		tokenizedText = tokenize(teks[$("#select_text").val()]);
+		pointer = 0;
+		fill_line_switcher();
 	});
-</script>
+	
+	$("#select_text").change(function(){
+		$("#text").text(teks[$(this).val()]);
+		tokenizedText = tokenize(teks[$(this).val()]);
+		pointer = 0;
+		fill_line_switcher();
+	});
+});
 
-<script>
+function tokenize(data) {
+	data = data.toLowerCase();
+	var words = data.split(/\W+/).filter(function(token) {
+		return token.length >= 2
+	});
+	return words;
+}
+
+function fill_line_switcher() {
+	var row1_string = "";
+    for (i = 0; i < tokenizedText.length; i++) {
+		row1_string += '<span wordnr="' + i + '" class="">' + tokenizedText[i] + "</span> ";
+	}
+    $("#text").html(row1_string);
+    $("#text span:first").addClass("highlight")
+};
+
+var check = null;
+
+function startTimer() {
+	if (check == null) {
+		var cnt = 0;
+		document.getElementById("Timer").innerHTML = '0 Second';
+
+		check = setInterval(function () {
+			cnt += 1;
+			document.getElementById("Timer").innerHTML = cnt + " Seconds";
+		}, 1000);
+	}
+}
+
+function stopTimer() {
+	clearInterval(check);
+	check = null;
+}
 
 showInfo('info_start');
 
@@ -178,6 +235,8 @@ if (!('webkitSpeechRecognition' in window)) {
     recognizing = true;
     showInfo('info_speak_now');
     start_img.src = 'mic-animate.gif';
+	pointer = 0;
+	fill_line_switcher();	
   };
 
   recognition.onerror = function(event) {
@@ -225,20 +284,39 @@ if (!('webkitSpeechRecognition' in window)) {
   };
 
   recognition.onresult = function(event) {
+	startTimer();
+	
     var interim_transcript = '';
     for (var i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) {
-        final_transcript += event.results[i][0].transcript;
+	  if (event.results[i].isFinal) {
+		var words = event.results[i][0].transcript.toLowerCase();
+        final_transcript += words;
+		var res = tokenize(words);
+		var arrayLength = res.length;
+		for (var idx = 0; idx < arrayLength; idx++) {
+			$row1_span_wordnr = $('#text span[wordnr="' + pointer + '"]');
+			if(tokenizedText[pointer] === res[idx]) {
+				//console.log(tokenizedText[pointer]);
+				$row1_span_wordnr.removeClass("highlight").addClass("correct");
+				pointer++;
+				$row1_span_wordnr = $('#text span[wordnr="' + pointer + '"]');
+				$row1_span_wordnr.addClass("highlight")
+			}
+			else {
+				$row1_span_wordnr.removeClass("highlight").addClass("highlight-wrong");
+				break;
+			}
+		}
       } else {
         interim_transcript += event.results[i][0].transcript;
       }
     }
-    final_transcript = capitalize(final_transcript);
+    //final_transcript = capitalize(final_transcript);
     final_span.innerHTML = linebreak(final_transcript);
     interim_span.innerHTML = linebreak(interim_transcript);
-    if (final_transcript || interim_transcript) {
-      showButtons('inline-block');
-    }
+    // if (final_transcript || interim_transcript) {
+    //   showButtons('inline-block');
+    // }
   };
 }
 
@@ -294,6 +372,8 @@ function emailButton() {
 function startButton(event) {
   if (recognizing) {
     recognition.stop();
+	stopTimer();
+	document.getElementById("Timer").innerHTML += '<br>Correct Words: ' + pointer;
     return;
   }
   final_transcript = '';
